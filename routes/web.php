@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\RoomMessageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,5 +24,5 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/', [ApplicationController::class, 'index'])->name('application');
-    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/rooms/{room}/messages', [RoomMessageController::class, 'index'])->name('rooms.messages.index');
 });

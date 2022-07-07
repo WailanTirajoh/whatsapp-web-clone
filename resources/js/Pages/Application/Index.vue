@@ -4,13 +4,54 @@ import { reactive, defineProps, toRefs } from 'vue'
 import AppLayout from '@/Layouts/AppLayout.vue';
 import TailRight from '@/Jetstream/Components/Chat/TailRight.vue';
 import TailLeft from '@/Jetstream/Components/Chat/TailLeft.vue';
+import LoaderDot from '@/Jetstream/Components/Loader/Dot.vue';
 
 const props = defineProps({
     rooms: Object,
 });
 
 const rooms = reactive(props.rooms.data);
-const chats = reactive([]);
+const chat = reactive({
+    messages: [],
+    isProcessing: false,
+});
+
+const selectedRoom = reactive({
+    profile_picture: null,
+    name: null,
+    room_id: null,
+})
+
+const changeRoom = async (room) => {
+    resetRoom()
+    chat.isProcessing = true
+    chat.messages = []
+    try {
+        const response = await axios.get(`/rooms/${room.id}/messages`)
+        if (response.data.messages) {
+            chat.messages = response.data.messages
+        }
+    } catch (e) {
+        if (e.response && e.response.data && e.response.data.errors) {
+            // Handle error
+        }
+    } finally {
+        chat.isProcessing = false
+        selectRoom(room)
+    }
+}
+
+const resetRoom = () => {
+    selectedRoom.profile_picture = null
+    selectedRoom.name = null
+    selectedRoom.room_id = null
+}
+
+const selectRoom = (room) => {
+    selectedRoom.profile_picture = room.profile_picture
+    selectedRoom.name = room.name
+    selectedRoom.room_id = room.id
+}
 </script>
 
 <template>
@@ -26,7 +67,9 @@ const chats = reactive([]);
             <!-- Body -->
             <div class="body overflow-auto overflow-x-hidden">
                 <div class="transition-all ease-in-out duration-200 py-4 px-2 flex gap-4 hover:bg-gray-100 relative border-b border-gray-100 hover:cursor-pointer"
-                    v-for="room in rooms" :key="room.id">
+                    :class="{
+                        'bg-gray-100': room.id === selectedRoom.room_id
+                    }" v-for="room in rooms" :key="room.id" @click="changeRoom(room)">
                     <div class="w-14 grid items-center justify-center">
                         <img :src="room.profile_picture" class="h-14 w-14 object-cover rounded-full">
                     </div>
@@ -57,14 +100,14 @@ const chats = reactive([]);
             </div>
             <!-- End Body -->
         </template>
-        <template #chatHeader>
+        <template #chatHeader v-if="selectedRoom.name">
             <div class="flex items-center gap-4">
                 <div class="">
-                    <img src="/dummy/profile-picture.jpeg" class="h-12 w-12 object-cover rounded-full">
+                    <img :src="selectedRoom.profile_picture" class="h-12 w-12 object-cover rounded-full">
                 </div>
                 <div class="">
-                    <div class="text-2xl text-gray-600">
-                        Babyboss
+                    <div class="text-xl text-gray-700">
+                        {{ selectedRoom.name }}
                     </div>
                 </div>
             </div>
@@ -87,236 +130,50 @@ const chats = reactive([]);
             </div>
         </template>
         <template #chat>
-            <div class="w-full max-h-full pb-8" v-if="chats.length > 0">
-                <!-- Other People -->
-                <div class="flex justify-start">
-                    <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
-                        <div class="absolute top-0 -left-2 text-white">
-                            <TailLeft />
-                        </div>
-                        Hari ini di traktir lagi Hari ini di traktir lagi Hari ini di traktir lagi Hari ini di
-                        traktir lagi Hari ini di traktir lagi Hari ini di traktir lagi
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:45
-                        </div>
-                    </div>
+            <div class="w-full h-full grid content-center" v-if="chat.isProcessing">
+                <div class="flex justify-center">
+                    <!-- <div class="bg-white rounded shadow-xl p-2"> -->
+                    <LoaderDot class=" w-24 h-2w-24" />
+                    <!-- </div> -->
                 </div>
-                <!-- End Other People -->
-
-                <!-- Me -->
-                <div class="flex justify-end">
-                    <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
-                        <div class="absolute top-0 -right-2 text-green-200">
-                            <TailRight />
-                        </div>
-                        Wih iyo eh
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:47
-                        </div>
-                    </div>
-                </div>
-
-                <!-- End Me -->
-                <!-- Other People -->
-                <div class="flex justify-start">
-                    <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
-                        <div class="absolute top-0 -left-2 text-white">
-                            <TailLeft />
-                        </div>
-                        Hari ini di traktir lagi
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:45
-                        </div>
-                    </div>
-                </div>
-                <!-- End Other People -->
-
-                <!-- Me -->
-                <div class="flex justify-end">
-                    <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
-                        <div class="absolute top-0 -right-2 text-green-200">
-                            <TailRight />
-                        </div>
-                        Wih iyo eh
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:47
-                        </div>
-                    </div>
-                </div>
-
-                <!-- End Me -->
-                <!-- Other People -->
-                <div class="flex justify-start">
-                    <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
-                        <div class="absolute top-0 -left-2 text-white">
-                            <TailLeft />
-                        </div>
-                        Hari ini di traktir lagi
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:45
-                        </div>
-                    </div>
-                </div>
-                <!-- End Other People -->
-
-                <!-- Me -->
-                <div class="flex justify-end">
-                    <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
-                        <div class="absolute top-0 -right-2 text-green-200">
-                            <TailRight />
-                        </div>
-                        Wih iyo eh
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:47
-                        </div>
-                    </div>
-                </div>
-
-                <!-- End Me -->
-                <!-- Other People -->
-                <div class="flex justify-start">
-                    <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
-                        <div class="absolute top-0 -left-2 text-white">
-                            <TailLeft />
-                        </div>
-                        Hari ini di traktir lagi
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:45
-                        </div>
-                    </div>
-                </div>
-                <!-- End Other People -->
-
-                <!-- Me -->
-                <div class="flex justify-end">
-                    <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
-                        <div class="absolute top-0 -right-2 text-green-200">
-                            <TailRight />
-                        </div>
-                        Wih iyo eh
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:47
-                        </div>
-                    </div>
-                </div>
-
-                <!-- End Me -->
-                <!-- Other People -->
-                <div class="flex justify-start">
-                    <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
-                        <div class="absolute top-0 -left-2 text-white">
-                            <TailLeft />
-                        </div>
-                        Hari ini di traktir lagi
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:45
-                        </div>
-                    </div>
-                </div>
-                <!-- End Other People -->
-
-                <!-- Me -->
-                <div class="flex justify-end">
-                    <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
-                        <div class="absolute top-0 -right-2 text-green-200">
-                            <TailRight />
-                        </div>
-                        Wih iyo eh
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:47
-                        </div>
-                    </div>
-                </div>
-
-                <!-- End Me -->
-                <!-- Other People -->
-                <div class="flex justify-start">
-                    <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
-                        <div class="absolute top-0 -left-2 text-white">
-                            <TailLeft />
-                        </div>
-                        Hari ini di traktir lagi
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:45
-                        </div>
-                    </div>
-                </div>
-                <!-- End Other People -->
-
-                <!-- Me -->
-                <div class="flex justify-end">
-                    <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
-                        <div class="absolute top-0 -right-2 text-green-200">
-                            <TailRight />
-                        </div>
-                        Wih iyo eh
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:47
-                        </div>
-                    </div>
-                </div>
-
-                <!-- End Me -->
-                <!-- Other People -->
-                <div class="flex justify-start">
-                    <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
-                        <div class="absolute top-0 -left-2 text-white">
-                            <TailLeft />
-                        </div>
-                        Hari ini di traktir lagi
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:45
-                        </div>
-                    </div>
-                </div>
-                <!-- End Other People -->
-
-                <!-- Me -->
-                <div class="flex justify-end">
-                    <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
-                        <div class="absolute top-0 -right-2 text-green-200">
-                            <TailRight />
-                        </div>
-                        Wih iyo eh
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:47
-                        </div>
-                    </div>
-                </div>
-
-                <!-- End Me -->
-                <!-- Other People -->
-                <div class="flex justify-start">
-                    <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
-                        <div class="absolute top-0 -left-2 text-white">
-                            <TailLeft />
-                        </div>
-                        Hari ini di traktir lagi
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:45
-                        </div>
-                    </div>
-                </div>
-                <!-- End Other People -->
-
-                <!-- Me -->
-                <div class="flex justify-end">
-                    <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
-                        <div class="absolute top-0 -right-2 text-green-200">
-                            <TailRight />
-                        </div>
-                        Wih iyo eh
-                        <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                            12:47
-                        </div>
-                    </div>
-                </div>
-
-                <!-- End Me -->
             </div>
-            <div class="w-full max-h-full pb-2 flex items-center justify-center">
-                <div class="bg-gray-100 rounded shadow-sm p-2 w-32 text-center">
-                    No message
+            <div class="w-full" v-else>
+                <div class="grid w-full max-h-full pb-2 gap-4" v-if="chat.messages.length > 0">
+                    <!-- Other People -->
+                    <div class="" v-for="message in chat.messages" :key="message.id">
+                        <div class="flex justify-start" v-if="$page.props.user.id != message.user_id">
+                            <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
+                                <div class="absolute top-0 -left-2 text-white">
+                                    <TailLeft />
+                                </div>
+                                {{ message.message }}
+                                <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+                                    {{ message.created_at }}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Other People -->
+
+                        <!-- Me -->
+                        <div class="flex justify-end" v-else>
+                            <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
+                                <div class="absolute top-0 -right-2 text-green-200">
+                                    <TailRight />
+                                </div>
+                                {{ message.message }}
+                                <div class="absolute bottom-2 right-2 text-xs text-gray-500">
+                                    {{ message.created_at }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- End Me -->
+                    </div>
+                </div>
+                <div class="w-full max-h-full pb-2 flex items-center justify-center" v-else>
+                    <div class="bg-gray-100 rounded shadow-sm p-2 w-32 text-center">
+                        No message
+                    </div>
                 </div>
             </div>
         </template>
@@ -336,8 +193,11 @@ const chats = reactive([]);
                 <!-- End Icon -->
                 <div class="flex items-center w-full">
                     <textarea @keydown.enter="sendMessage($event)" type="text"
-                        class="w-full border-gray-100 rounded-lg bg-white focus:outline-none focus:ring-0 focus:border-transparent text-2xl p-4 resize-none"
-                        placeholder="Ketik Pesan" rows="1"></textarea>
+                        class="w-full border-gray-100 rounded-lg bg-white focus:outline-none focus:ring-0 focus:border-transparent text-2xl p-4 resize-none transition-all ease-in-out duration-300"
+                        :class="{
+                            'bg-gray-200': selectedRoom.name == null
+                        }" placeholder="Ketik pesan"
+                        rows="1" :disabled="selectedRoom.name == null"></textarea>
                 </div>
             </div>
             <!-- Voice Note -->
