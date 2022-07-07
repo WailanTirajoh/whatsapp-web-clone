@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +21,6 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/', [ApplicationController::class, 'index'])->name('application');
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
 });
