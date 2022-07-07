@@ -26,34 +26,74 @@ const switchToTeam = (team) => {
 const logout = () => {
     Inertia.post(route('logout'));
 };
+
+const sendMessage = (evt) => {
+    if (evt.keyCode == 13 && !evt.shiftKey) {
+        alert('sendMessage')
+    }
+}
+
 </script>
 
 <template>
     <div class="bg-gray-200 h-screen p-0">
 
         <Head :title="title" />
-        <div class="grid grid-cols-10 h-full">
-            <aside class="col-span-5 md:col-span-4 lg:col-span-3 xl:col-span-2 bg-white border-r">
+        <div class="grid grid-cols-12 h-full">
+            <aside class="col-span-5 md:col-span-4 lg:col-span-3 xl:col-span-3 bg-white border-r">
                 <!-- Header -->
                 <div class="bg-gray-100 flex p-5 items-center justify-between header">
                     <div>
-                        <img src="dummy/profile-picture.jpeg" class="h-14 w-14 object-cover rounded-full">
+                        <img src="dummy/profile-picture.jpeg" class="h-12 w-12 object-cover rounded-full">
                     </div>
                     <div class="flex gap-2">
                         <!-- Status -->
 
                         <!-- End Status -->
                         <!-- New Chat -->
-                        <div
-                            class="w-10 h-10 rounded-full grid place-items-center border-0 hover:border-2 transition-all ease-in-out duration-300">
-                            <i class="fa-solid text-gray-500 fa-message"></i>
-                        </div>
+
+                        <JetDropdown align="right" width="48">
+                            <template #trigger>
+                                <div
+                                    class="w-10 h-10 rounded-full grid place-items-center border-0 hover:border-2 transition-all ease-in-out duration-300">
+                                    <i class="fa-solid text-gray-500 fa-message"></i>
+                                </div>
+                            </template>
+
+                            <template #content>
+                                <!-- Account Management -->
+                                <div class="block px-4 py-2 text-xs text-gray-400">
+                                    Chat
+                                </div>
+
+                                <JetDropdownLink :href="route('dashboard')">
+                                    New Chat
+                                </JetDropdownLink>
+                            </template>
+                        </JetDropdown>
                         <!-- End New Chat -->
                         <!-- Menu -->
-                        <div
-                            class="w-10 h-10 rounded-full grid place-items-center border-0 hover:border-2 transition-all ease-in-out duration-300">
-                            <i class="fa-solid text-gray-500 fa-ellipsis-vertical"></i>
-                        </div>
+                        <JetDropdown align="right" width="48">
+                            <template #trigger>
+                                <div
+                                    class="w-10 h-10 rounded-full grid place-items-center border-0 hover:border-2 transition-all ease-in-out duration-300">
+                                    <i class="fa-solid text-gray-500 fa-ellipsis-vertical"></i>
+                                </div>
+                            </template>
+
+                            <template #content>
+                                <!-- Account Management -->
+                                <div class="block px-4 py-2 text-xs text-gray-400">
+                                    System
+                                </div>
+
+                                <form @submit.prevent="logout">
+                                    <JetDropdownLink as="button">
+                                        Log Out
+                                    </JetDropdownLink>
+                                </form>
+                            </template>
+                        </JetDropdown>
                         <!-- End Menu -->
                     </div>
                 </div>
@@ -68,9 +108,9 @@ const logout = () => {
                 <!-- Body -->
                 <div class="body overflow-auto overflow-x-hidden">
                     <div
-                        class="transition-all ease-in-out duration-200 py-4 px-2 flex gap-3 hover:bg-gray-100 relative border-b border-gray-100 hover:cursor-pointer">
-                        <div class="w-16 grid items-center justify-center">
-                            <img src="dummy/profile-picture.jpeg" class="h-16 w-16 object-cover rounded-full">
+                        class="transition-all ease-in-out duration-200 py-4 px-2 flex gap-4 hover:bg-gray-100 relative border-b border-gray-100 hover:cursor-pointer">
+                        <div class="w-14 grid items-center justify-center">
+                            <img src="dummy/profile-picture.jpeg" class="h-14 w-14 object-cover rounded-full">
                         </div>
                         <div class="flex items-center w-full">
                             <div class="pr-3 overflow-hidden">
@@ -82,7 +122,7 @@ const logout = () => {
                                         <!-- Icon -->
                                     </div>
                                     <div class="whitespace-nowrap text-ellipsis overflow-hidden text-gray-500">
-                                        wkwkwkwk emote apatuh sayang
+                                        wkwkwkwk emote apatuh
                                     </div>
                                 </div>
                             </div>
@@ -99,12 +139,12 @@ const logout = () => {
                 </div>
                 <!-- End Body -->
             </aside>
-            <div class="col-span-5 md:col-span-6 lg:col-span-7 xl:col-span-8">
+            <div class="col-span-7 md:col-span-8 lg:col-span-9 xl:col-span-9">
                 <header class="bg-gray-100 flex items-center p-4 justify-between">
                     <!-- <slot name="header" /> -->
                     <div class="flex items-center gap-4">
                         <div class="">
-                            <img src="dummy/profile-picture.jpeg" class="h-14 w-14 object-cover rounded-full">
+                            <img src="dummy/profile-picture.jpeg" class="h-12 w-12 object-cover rounded-full">
                         </div>
                         <div class="">
                             <div class="text-2xl text-gray-600">
@@ -145,7 +185,7 @@ const logout = () => {
                                             d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z"></path>
                                     </svg>
                                 </div>
-                                Hari ini di traktir lagi sayang
+                                Hari ini di traktir lagi
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:45
                                 </div>
@@ -164,7 +204,7 @@ const logout = () => {
                                             d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z"></path>
                                     </svg>
                                 </div>
-                                Wih iyo eh sayang
+                                Wih iyo eh
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:47
                                 </div>
@@ -183,7 +223,7 @@ const logout = () => {
                                             d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z"></path>
                                     </svg>
                                 </div>
-                                Hari ini di traktir lagi sayang
+                                Hari ini di traktir lagi
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:45
                                 </div>
@@ -202,7 +242,7 @@ const logout = () => {
                                             d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z"></path>
                                     </svg>
                                 </div>
-                                Wih iyo eh sayang
+                                Wih iyo eh
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:47
                                 </div>
@@ -221,7 +261,7 @@ const logout = () => {
                                             d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z"></path>
                                     </svg>
                                 </div>
-                                Hari ini di traktir lagi sayang
+                                Hari ini di traktir lagi
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:45
                                 </div>
@@ -240,7 +280,7 @@ const logout = () => {
                                             d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z"></path>
                                     </svg>
                                 </div>
-                                Wih iyo eh sayang
+                                Wih iyo eh
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:47
                                 </div>
@@ -259,7 +299,7 @@ const logout = () => {
                                             d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z"></path>
                                     </svg>
                                 </div>
-                                Hari ini di traktir lagi sayang
+                                Hari ini di traktir lagi
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:45
                                 </div>
@@ -278,7 +318,7 @@ const logout = () => {
                                             d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z"></path>
                                     </svg>
                                 </div>
-                                Wih iyo eh sayang
+                                Wih iyo eh
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:47
                                 </div>
@@ -297,7 +337,7 @@ const logout = () => {
                                             d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z"></path>
                                     </svg>
                                 </div>
-                                Hari ini di traktir lagi sayang
+                                Hari ini di traktir lagi
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:45
                                 </div>
@@ -316,7 +356,7 @@ const logout = () => {
                                             d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z"></path>
                                     </svg>
                                 </div>
-                                Wih iyo eh sayang
+                                Wih iyo eh
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:47
                                 </div>
@@ -335,7 +375,7 @@ const logout = () => {
                                             d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z"></path>
                                     </svg>
                                 </div>
-                                Hari ini di traktir lagi sayang
+                                Hari ini di traktir lagi
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:45
                                 </div>
@@ -354,7 +394,7 @@ const logout = () => {
                                             d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z"></path>
                                     </svg>
                                 </div>
-                                Wih iyo eh sayang
+                                Wih iyo eh
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:47
                                 </div>
@@ -373,7 +413,7 @@ const logout = () => {
                                             d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z"></path>
                                     </svg>
                                 </div>
-                                Hari ini di traktir lagi sayang
+                                Hari ini di traktir lagi
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:45
                                 </div>
@@ -392,7 +432,7 @@ const logout = () => {
                                             d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z"></path>
                                     </svg>
                                 </div>
-                                Wih iyo eh sayang
+                                Wih iyo eh
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:47
                                 </div>
@@ -411,7 +451,7 @@ const logout = () => {
                                             d="M1.533 2.568 8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z"></path>
                                     </svg>
                                 </div>
-                                Hari ini di traktir lagi sayang
+                                Hari ini di traktir lagi
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:45
                                 </div>
@@ -430,7 +470,7 @@ const logout = () => {
                                             d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z"></path>
                                     </svg>
                                 </div>
-                                Wih iyo eh sayang
+                                Wih iyo eh
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
                                     12:47
                                 </div>
@@ -456,7 +496,7 @@ const logout = () => {
                             </div>
                         </div>
                         <div class="flex items-center w-full">
-                            <textarea type="text"
+                            <textarea @keydown.enter="sendMessage($event)" type="text"
                                 class="w-full border-gray-100 rounded-lg bg-white focus:outline-none focus:ring-0 focus:border-transparent text-2xl p-4 resize-none"
                                 placeholder="Ketik Pesan" rows="1"></textarea>
                         </div>
@@ -476,9 +516,11 @@ const logout = () => {
 </template>
 
 <style lang="scss" scoped>
+$headerHeight: 4.5rem;
+
 aside {
     .header {
-        height: 5rem;
+        height: $headerHeight;
     }
 
     .search {
@@ -486,7 +528,7 @@ aside {
     }
 
     .body {
-        height: calc(100vh - (5rem + 4rem));
+        height: calc(100vh - ($headerHeight + 4rem));
 
         &::-webkit-scrollbar {
             width: 0.65rem;
@@ -509,11 +551,11 @@ aside {
 }
 
 header {
-    height: 5rem;
+    height: $headerHeight;
 }
 
 main {
-    height: calc(100vh - (5rem + 6rem));
+    height: calc(100vh - ($headerHeight + 6rem));
     background-image: url("/default/room-bg.webp");
     overflow: auto;
 
