@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, defineProps, toRefs } from 'vue'
+import { reactive, defineProps, toRefs, onMounted, onUnmounted } from 'vue'
 
 import AppLayout from '@/Layouts/AppLayout.vue';
 import TailRight from '@/Jetstream/Components/Chat/TailRight.vue';
@@ -13,6 +13,14 @@ import JetInput from '@/Jetstream/Input.vue';
 import Toast from '@/Jetstream/Components/System/Toast.vue';
 
 import { Inertia } from '@inertiajs/inertia';
+
+const app = reactive({
+    title: 'Dashboard'
+})
+
+const setTitle = (newTitle) => {
+    app.title = newTitle
+}
 
 const toast = reactive({
     show: false,
@@ -55,11 +63,12 @@ const chat = reactive({
 const selectedRoom = reactive({
     profile_picture: null,
     name: null,
-    room_id: null,
+    id: null,
 })
 
 const changeRoom = async (room) => {
     selectRoom(room)
+    setTitle(room.name)
     chat.isProcessing = true
     chat.messages = []
     try {
@@ -79,13 +88,13 @@ const changeRoom = async (room) => {
 const resetRoom = () => {
     selectedRoom.profile_picture = null
     selectedRoom.name = null
-    selectedRoom.room_id = null
+    selectedRoom.id = null
 }
 
 const selectRoom = (room) => {
     selectedRoom.profile_picture = room.profile_picture
     selectedRoom.name = room.name
-    selectedRoom.room_id = room.id
+    selectedRoom.id = room.id
 }
 
 const sendMessage = (event) => {
@@ -100,7 +109,7 @@ const logout = () => {
 const newChat = reactive({
     showModal: false,
     email: '',
-    processing: false,
+    isProcessing: false,
 })
 
 const openModal = () => {
@@ -113,8 +122,8 @@ const closeModal = () => {
 
 const findUsersByEmail = async () => {
     if (newChat.email == null || newChat.email == '') return
-    newChat.processing = true
 
+    newChat.isProcessing = true
     try {
         const response = await axios.get(`/new-chat/get-users-by-email`, {
             params: {
@@ -124,22 +133,22 @@ const findUsersByEmail = async () => {
         showToast({ message: response.data.message, type: "success" });
         closeModal()
         const userRoomsResponse = await getUserRooms()
-        console.log(userRoomsResponse.data.data)
         if (userRoomsResponse) {
             rooms.data = userRoomsResponse.data.data
-            console.log(rooms.data)
+            email = ''
         }
     } catch (e) {
         errorHandler(e)
+    } finally {
+        newChat.isProcessing = false
     }
 }
 
 const errorHandler = (e) => {
-    console.log(e)
     if (e.response && e.response.data.message) {
-        showToast({ message: e.response.data.message, type: "error" });
+        return showToast({ message: e.response.data.message, type: "error" });
     }
-    showToast({ message: e.message, type: "error" });
+    return showToast({ message: e.message, type: "error" });
 }
 
 const getUserRooms = async () => {
@@ -155,10 +164,28 @@ const getUserRooms = async () => {
         errorHandler(e)
     }
 }
+
+onMounted(() => {
+    console.log('masuks')
+    console.log(Echo)
+    Echo.channel(`hai`)
+        .listen(".hai", data => {
+            // vm.messages.push(data);
+            // var container = this.$el.querySelector(
+            //     "#messageContainer"
+            // );
+            // setTimeout(() => {
+            //     container.scrollTop = container.scrollHeight;
+            // }, 200);
+            console.log('masok pak eko')
+            alert('masok')
+        });
+
+})
 </script>
 
 <template>
-    <AppLayout title="Dashboard">
+    <AppLayout :title="app.title">
         <template #roomHeader>
             <Toast :message="toast.message" :is-shown="toast.show" :type="toast.type" />
             <div class="bg-gray-100 flex p-5 items-center justify-between header">
@@ -183,11 +210,6 @@ const getUserRooms = async () => {
                             <div class="block px-4 py-2 text-xs text-gray-400">
                                 Chat
                             </div>
-
-                            <!-- <JetDropdownLink :href="route('application')">
-                                New Chat
-                            </JetDropdownLink> -->
-
                             <div class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition cursor-pointer"
                                 @click="openModal">
                                 New Chat
@@ -203,7 +225,7 @@ const getUserRooms = async () => {
                                     <div class="mt-4">
                                         <JetInput ref="emailInput" v-model="newChat.email" type="email"
                                             class="mt-1 block w-3/4" placeholder="Find by email"
-                                            @keyup.enter="findUsersByEmail" />
+                                            @keyup.enter="findUsersByEmail" :disabled="newChat.isProcessing" />
                                     </div>
                                 </template>
 
@@ -256,7 +278,7 @@ const getUserRooms = async () => {
             <div class="body overflow-auto overflow-x-hidden">
                 <div class="transition-all ease-in-out duration-200 py-4 px-2 flex gap-4 hover:bg-gray-100 relative border-b border-gray-100 hover:cursor-pointer"
                     :class="{
-                        'bg-gray-100': room.id === selectedRoom.room_id
+                        'bg-gray-100': room.id === selectedRoom.id
                     }" v-for="room in rooms.data" :key="room.id" @click="changeRoom(room)">
                     <div class="w-14 grid items-center justify-center">
                         <img :src="room.profile_picture" class="h-14 w-14 object-cover rounded-full">
@@ -383,8 +405,9 @@ const getUserRooms = async () => {
                     <textarea @keydown.enter="sendMessage($event)" type="text"
                         class="w-full border-gray-100 rounded-lg bg-white focus:outline-none focus:ring-0 focus:border-transparent text-2xl p-4 resize-none transition-all ease-in-out duration-300"
                         :class="{
-                            'bg-gray-200': selectedRoom.name == null
-                        }" placeholder="Ketik pesan" rows="1" :disabled="selectedRoom.name == null"></textarea>
+                            'bg-gray-200': selectedRoom.id == null || chat.isProcessing
+                        }" placeholder="Ketik pesan" rows="1"
+                        :disabled="selectedRoom.id == null || chat.isProcessing"></textarea>
                 </div>
             </div>
             <!-- Voice Note -->

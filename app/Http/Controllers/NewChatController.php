@@ -14,18 +14,18 @@ class NewChatController extends Controller
     {
         $user = User::where('email', $request->email)->first();
 
-        if(!$user) abort(Response::HTTP_NOT_FOUND, "User for email $request->email not found on our system");
+        if (!$user) abort(Response::HTTP_NOT_FOUND, "User for email $request->email not found on our system");
+        if ($user->email == Auth::user()->email) abort(Response::HTTP_BAD_REQUEST, "Its you!");
+
+        $authRooms = Auth::user()->rooms()->pluck('id')->toArray();
+        $userRooms = $user->rooms()->pluck('id')->toArray();
+        $intersect = array_intersect($authRooms, $userRooms);
+        if (count($intersect) > 0) abort(Response::HTTP_BAD_REQUEST, "You already have chat with $user->name");
 
         // Create room for the user
         $room = Room::create([
             'type' => Room::TYPE_PERSONAL
         ]);
-        $authRooms = Auth::user()->rooms()->pluck('id')->toArray();
-        $userRooms = $user->rooms()->pluck('id')->toArray();
-
-        $intersect = array_intersect($authRooms, $userRooms);
-        if(count($intersect) > 0) abort(Response::HTTP_BAD_REQUEST, "You already have chat with $user->name");
-
         $room->users()->attach(Auth::id(), ['join_at' => now()]);
         $room->users()->attach($user->id, ['join_at' => now()]);
 

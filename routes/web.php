@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\WebsocketTest;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MessageController;
@@ -19,6 +20,9 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/websocket-test', function() {
+    broadcast(new WebsocketTest('test'));
+});
 
 Route::middleware([
     'auth:sanctum',
