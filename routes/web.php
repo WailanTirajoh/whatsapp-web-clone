@@ -3,8 +3,10 @@
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NewChatController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomMessageController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,4 +27,6 @@ Route::middleware([
 ])->group(function () {
     Route::get('/', [ApplicationController::class, 'index'])->name('application');
     Route::get('/rooms/{room}/messages', [RoomMessageController::class, 'index'])->name('rooms.messages.index');
+
+    Route::get('/new-chat/get-users-by-email', [NewChatController::class, 'getUsersByEmail'])->name('new-chat.get-users-by-email');
 });

@@ -9,10 +9,22 @@ use Inertia\Inertia;
 
 class ApplicationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->type) {
+            $type = $request->type;
+            $params = $request->params;
+            return $this->$type($params);
+        }
         return Inertia::render('Application/Index', [
             'rooms' => AuthUserRoomsResource::collection(Auth::user()->rooms)
+        ]);
+    }
+
+    private function getUserRooms()
+    {
+        return response()->json([
+            'data' => AuthUserRoomsResource::collection(Auth::user()->rooms)
         ]);
     }
 }

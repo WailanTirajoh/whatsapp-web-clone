@@ -1,16 +1,9 @@
 <script setup>
-import { Inertia } from '@inertiajs/inertia';
 import { Head } from '@inertiajs/inertia-vue3';
-import JetDropdown from '@/Jetstream/Dropdown.vue';
-import JetDropdownLink from '@/Jetstream/DropdownLink.vue';
 
 defineProps({
     title: String,
 });
-
-const logout = () => {
-    Inertia.post(route('logout'));
-};
 </script>
 
 <template>
@@ -20,62 +13,7 @@ const logout = () => {
         <div class="grid grid-cols-12 h-full">
             <aside class="col-span-5 md:col-span-4 lg:col-span-3 xl:col-span-3 bg-white border-r">
                 <!-- Room List Header -->
-                <div class="bg-gray-100 flex p-5 items-center justify-between header">
-                    <div>
-                        <img :src="$page.props.user.profile_photo_url"
-                            class="h-12 w-12 object-cover rounded-full border">
-                    </div>
-                    <div class="flex gap-2">
-                        <!-- Status -->
-
-                        <!-- End Status -->
-                        <!-- New Chat -->
-
-                        <JetDropdown align="right" width="48">
-                            <template #trigger>
-                                <div
-                                    class="w-10 h-10 rounded-full grid place-items-center border-0 hover:border-2 transition-all ease-in-out duration-300 cursor-pointer">
-                                    <i class="fa-solid text-gray-500 fa-message"></i>
-                                </div>
-                            </template>
-
-                            <template #content>
-                                <!-- Account Management -->
-                                <div class="block px-4 py-2 text-xs text-gray-400">
-                                    Chat
-                                </div>
-
-                                <JetDropdownLink :href="route('application')">
-                                    New Chat
-                                </JetDropdownLink>
-                            </template>
-                        </JetDropdown>
-                        <!-- End New Chat -->
-                        <!-- Menu -->
-                        <JetDropdown align="right" width="48">
-                            <template #trigger>
-                                <div
-                                    class="w-10 h-10 rounded-full grid place-items-center border-0 hover:border-2 transition-all ease-in-out duration-300 cursor-pointer">
-                                    <i class="fa-solid text-gray-500 fa-ellipsis-vertical"></i>
-                                </div>
-                            </template>
-
-                            <template #content>
-                                <!-- Account Management -->
-                                <div class="block px-4 py-2 text-xs text-gray-400">
-                                    System
-                                </div>
-
-                                <form @submit.prevent="logout">
-                                    <JetDropdownLink as="button">
-                                        Log Out
-                                    </JetDropdownLink>
-                                </form>
-                            </template>
-                        </JetDropdown>
-                        <!-- End Menu -->
-                    </div>
-                </div>
+                <slot name="roomHeader" />
                 <!-- End Room List Header -->
                 <slot name="rooms" />
             </aside>
@@ -95,7 +33,7 @@ const logout = () => {
     </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 $headerHeight: 4.5rem;
 $chatHeight: 6rem;
 
