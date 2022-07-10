@@ -14,7 +14,6 @@ import Toast from '@/Jetstream/Components/System/Toast.vue';
 
 import { Inertia } from '@inertiajs/inertia';
 
-const OneDay = new Date().getTime() + (1 * 24 * 60 * 60 * 1000)
 
 const app = reactive({
     title: 'Dashboard'
@@ -433,7 +432,7 @@ const checkIndex = (index) => {
                     <!-- Other People -->
                     <div class="" v-for="message, index in selectedRoom.messages" :key="message.id">
                         <div class="flex justify-center"
-                            v-if="index == 0 || moment(selectedRoom.messages[index - 1].created_at).format('DD') != moment(message.created_at).format('DD')">
+                            v-if="(index == 0 || moment(selectedRoom.messages[index - 1].created_at).format('DD') != moment(message.created_at).format('DD') && moment(message.created_at).isValid())">
                             <div class="p-2 bg-gray-50 shadow-sm rounded-lg">
                                 {{ moment(message.created_at).calendar({
                                         sameDay: '[Today]',
