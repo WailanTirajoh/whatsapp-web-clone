@@ -14,6 +14,8 @@ import Toast from '@/Jetstream/Components/System/Toast.vue';
 
 import { Inertia } from '@inertiajs/inertia';
 
+const OneDay = new Date().getTime() + (1 * 24 * 60 * 60 * 1000)
+
 const app = reactive({
     title: 'Dashboard'
 })
@@ -36,7 +38,7 @@ const showToast = ({ message, type }) => {
 }
 
 const hideToast = async () => {
-    await wait(2000);
+    await wait(5000);
     toast.show = false;
     toast.message = "";
     toast.type = "success";
@@ -139,6 +141,7 @@ const sendMessage = async (e) => {
         message: message,
         user_id: Inertia.page.props.user.id,
         user_name: Inertia.page.props.user.name,
+        reads: [],
     }
     selectedRoom.messages.push(newMessage)
     scrollToBottomOfChat()
@@ -227,6 +230,16 @@ const getUserRooms = async () => {
     } catch (e) {
         errorHandler(e)
     }
+}
+
+const checkMessageRead = (messageReads) => {
+    return messageReads.filter((read) => {
+        return read.user_id != Inertia.page.props.user.id
+    }).length > 0
+}
+
+const checkIndex = (index) => {
+    if (index === selectedRoom.messages.length - 1) scrollToBottomOfChat()
 }
 
 // onMounted(() => {
@@ -416,17 +429,37 @@ const getUserRooms = async () => {
                 </div>
             </div>
             <div ref="chatbody" class="w-full chat-body" v-else>
-                <div class="grid w-full max-h-full pb-4 pt-12 gap-4" v-if="selectedRoom.messages.length > 0">
+                <div class="grid w-full max-h-full pb-4 pt-12 gap-x-4 gap-y-1" v-if="selectedRoom.messages.length > 0">
                     <!-- Other People -->
-                    <div class="" v-for="message in selectedRoom.messages" :key="message.id">
+                    <div class="" v-for="message, index in selectedRoom.messages" :key="message.id">
+                        <div class="flex justify-center"
+                            v-if="index == 0 || moment(selectedRoom.messages[index - 1].created_at).format('DD') != moment(message.created_at).format('DD')">
+                            <div class="p-2 bg-gray-50 shadow-sm rounded-lg">
+                                {{ moment(message.created_at).calendar({
+                                        sameDay: '[Today]',
+                                        nextDay: '[Tomorrow]',
+                                        nextWeek: 'dddd',
+                                        lastDay: '[Yesterday]',
+                                        lastWeek: '[Last] dddd',
+                                        sameElse: 'DD/MM/YYYY'
+                                    })
+                                }}
+                            </div>
+                        </div>
                         <div class="flex justify-start" v-if="$page.props.user.id != message.user_id">
-                            <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
-                                <div class="absolute top-0 -left-2 text-white">
+                            <div class="bg-white rounded-xl p-3 pr-16 pb-4 relative shadow max-w-sm " :class="{
+                                'rounded-tl-none': index == 0 || selectedRoom.messages[index - 1].user_id != message.user_id
+                            }">
+                                <div class="absolute top-0 -left-2 text-white"
+                                    v-if="index == 0 || selectedRoom.messages[index - 1].user_id != message.user_id">
                                     <TailLeft />
                                 </div>
                                 {{ message.message }}
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                                    {{ message.created_at }}
+                                    {{ moment(message.created_at).isValid()
+                                            ? moment(message.created_at).format('HH.mm')
+                                            : message.created_at
+                                    }}
                                 </div>
                             </div>
                         </div>
@@ -434,13 +467,62 @@ const getUserRooms = async () => {
 
                         <!-- Me -->
                         <div class="flex justify-end" v-else>
-                            <div class="bg-green-200 rounded-xl rounded-tr-none p-3 pr-16 relative shadow max-w-sm">
-                                <div class="absolute top-0 -right-2 text-green-200">
+                            <div class="bg-green-200 rounded-xl p-3 pr-16 pb-6 relative shadow max-w-sm" :class="{
+                                'rounded-tr-none': index == 0 || selectedRoom.messages[index - 1].user_id != message.user_id
+                            }">
+                                <div class="absolute top-0 -right-2 text-green-200"
+                                    v-if="index == 0 || selectedRoom.messages[index - 1].user_id != message.user_id">
                                     <TailRight />
                                 </div>
                                 {{ message.message }}
                                 <div class="absolute bottom-2 right-2 text-xs text-gray-500">
-                                    {{ message.created_at }}
+                                    <div class="flex gap-x-2">
+                                        <div class="">
+                                            {{ moment(message.created_at).isValid()
+                                                    ? moment(message.created_at).format('HH.mm')
+                                                    : message.created_at
+                                            }}
+                                        </div>
+                                        <div class="w-3 text-right">
+                                            <JetDropdown align="right" width="48">
+                                                <template #trigger>
+                                                    <div class="transition-all ease-in-out duration-300 cursor-pointer w-2"
+                                                        @click="checkIndex(index)">
+                                                        <i class="fa-solid " :class="{
+                                                            'fa-check-double text-blue-400': checkMessageRead(message.reads),
+                                                            'fa-check text-gray-500': !checkMessageRead(message.reads),
+                                                            'fa-clock text-gray-500': !moment(message.created_at).isValid(),
+                                                        }"></i>
+                                                    </div>
+                                                </template>
+
+                                                <template #content>
+                                                    <!-- Account Management -->
+                                                    <div class="block px-4 py-2 text-xs text-gray-400">
+                                                        Dibaca oleh:
+                                                    </div>
+
+                                                    <JetDropdownLink as="button" v-for="read in message.reads"
+                                                        :key="read.id">
+                                                        <div class="flex items-center gap-x-2">
+                                                            <div class="flex items-center">
+                                                                <img :src="read.user.profile_photo_url"
+                                                                    class="h-6 w-6 object-cover rounded-full border">
+                                                            </div>
+                                                            <div class="flext items-center">
+                                                                <div class="">
+                                                                    {{ read.user.name }}
+                                                                </div>
+                                                                <div class="text-xs text-gray-600">
+                                                                    {{ moment(read.read_at).calendar() }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </JetDropdownLink>
+                                                </template>
+                                            </JetDropdown>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

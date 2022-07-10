@@ -31,4 +31,9 @@ class Message extends Model
     {
         return $this->belongsTo(Room::class);
     }
+
+    public function reads()
+    {
+        return $this->hasMany(MessageRead::class, 'message_id');
+    }
 }

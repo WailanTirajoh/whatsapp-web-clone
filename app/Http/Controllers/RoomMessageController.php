@@ -17,8 +17,23 @@ class RoomMessageController extends Controller
 {
     public function index(Room $room)
     {
+        DB::beginTransaction();
+        foreach ($room->messages()->where('sender_id', '!=', Auth::id())->with('reads')->get() as $message) {
+            if (!in_array(Auth::id(), $message->reads->pluck('user_id')->toArray())) {
+                $message->reads()->create([
+                    'user_id' => Auth::id(),
+                    'read_at' => now()
+                ]);
+            }
+        }
+        DB::commit();
         return response()->json([
-            'messages' => RoomMessageResource::collection($room->messages()->with('user')->get())
+            'messages' => RoomMessageResource::collection($room->messages()->with([
+                'user',
+                'reads' => [
+                    'user'
+                ]
+            ])->get())
         ]);
     }
 

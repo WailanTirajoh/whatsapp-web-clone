@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class RoomMessageResource extends JsonResource
+class RoomMessageReadResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,12 +15,11 @@ class RoomMessageResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'user_name' => $this->user->name,
-            'user_id' => $this->user->id,
-            'message' => $this->message,
-            'reads' => RoomMessageReadResource::collection($this->reads),
-            'created_at' => $this->created_at,
+            "id" => $this->id,
+            "message_id" => $this->message_id,
+            "user_id" => $this->user_id,
+            "read_at" => $this->read_at,
+            "user" => RoomMessageReadUserResource::make($this->user)
         ];
     }
 }

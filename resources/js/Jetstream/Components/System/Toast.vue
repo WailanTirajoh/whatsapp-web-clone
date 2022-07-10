@@ -1,7 +1,7 @@
 <template>
     <transition name="toast">
-        <div class="mx-auto w-80 fixed inset-x-0 top-10 z-50 text-center" v-if="isShown">
-            <div class="p-3 text-white rounded-3xl px-5 shadow bg-opacity-95" :class="classType">
+        <div class="left-10 w-80 fixed inset-x-0 bottom-10 z-50 text-center" v-if="isShown">
+            <div class="p-3 text-white rounded-3xl px-5 shadow bg-opacity-95 break-words" :class="classType">
                 {{ message }}
             </div>
         </div>
@@ -50,7 +50,7 @@ export default {
 <style scoped>
 .toast-enter-from {
     opacity: 0;
-    transform: translateY(-60px);
+    transform: translateY(100%);
 }
 
 .toast-enter-active {
@@ -60,7 +60,7 @@ export default {
 
 .toast-leave-to {
     opacity: 0;
-    transform: translateY(-60px);
+    transform: translateY(100%);
 }
 
 .toast-leave-active {
