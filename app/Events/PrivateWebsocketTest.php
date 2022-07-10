@@ -11,20 +11,18 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class WebsocketTest implements ShouldBroadcastNow
+class PrivateWebsocketTest implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    private $message;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($message)
+    public function __construct()
     {
-        $this->message = $message;
+        //
     }
 
     /**
@@ -34,12 +32,12 @@ class WebsocketTest implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('private.chat.1');
+        return new PrivateChannel('private-channel');
     }
 
     public function broadcastAs()
     {
-        return 'chat-message';
+        return 'private-channel';
     }
 
     /**
@@ -47,8 +45,5 @@ class WebsocketTest implements ShouldBroadcastNow
      */
     public function broadcastWith()
     {
-        return [
-            'message' => $this->message,
-        ];
     }
 }

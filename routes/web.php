@@ -1,5 +1,7 @@
 <?php
 
+use App\Events\PrivateWebsocketTest;
+use App\Events\PublicWebsocketTest;
 use App\Events\WebsocketTest;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DashboardController;
@@ -21,7 +23,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::get('/websocket-test', function() {
-    broadcast(new WebsocketTest('test'));
+    // broadcast(new WebsocketTest('test'));
+    broadcast(new PublicWebsocketTest());
+    broadcast(new PrivateWebsocketTest());
 });
 
 Route::middleware([

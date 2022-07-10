@@ -166,21 +166,23 @@ const getUserRooms = async () => {
 }
 
 onMounted(() => {
-    console.log('masuks')
-    console.log(Echo)
-    Echo.channel(`hai`)
-        .listen(".hai", data => {
-            // vm.messages.push(data);
-            // var container = this.$el.querySelector(
-            //     "#messageContainer"
-            // );
-            // setTimeout(() => {
-            //     container.scrollTop = container.scrollHeight;
-            // }, 200);
-            console.log('masok pak eko')
-            alert('masok')
-        });
-
+    Echo.private(`private-channel`)
+        // .subscribe(() => {
+        //     console.log('subscribed')
+        // })
+        .subscribed(() => {
+            console.log('private subs')
+        })
+        .listen('.private-channel', (event) => {
+            console.log('private:', event)
+        })
+    Echo.channel('public-channel')
+        .subscribed(() => {
+            console.log('public subs')
+        })
+        .listen('.public-channel', (event) => {
+            console.log('public: ', event)
+        })
 })
 </script>
 
