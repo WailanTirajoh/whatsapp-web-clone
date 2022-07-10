@@ -35,6 +35,7 @@ Route::middleware([
 ])->group(function () {
     Route::get('/', [ApplicationController::class, 'index'])->name('application');
     Route::get('/rooms/{room}/messages', [RoomMessageController::class, 'index'])->name('rooms.messages.index');
+    Route::post('/rooms/{room}/messages', [RoomMessageController::class, 'store'])->name('rooms.messages.store');
 
     Route::get('/new-chat/get-users-by-email', [NewChatController::class, 'getUsersByEmail'])->name('new-chat.get-users-by-email');
 });

@@ -55,34 +55,43 @@ const props = defineProps({
 const rooms = reactive({
     data: props.rooms.data
 });
-const chat = reactive({
-    messages: [],
-    isProcessing: false,
-});
 
 const selectedRoom = reactive({
     profile_picture: null,
     name: null,
     id: null,
+    messages: [],
+    isChangingRoom: false,
+    form: {
+        message: null,
+        isProcessing: false
+    }
 })
 
 const changeRoom = async (room) => {
     selectRoom(room)
     setTitle(room.name)
-    chat.isProcessing = true
-    chat.messages = []
+    selectedRoom.isChangingRoom = true
+    selectedRoom.messages = []
     try {
         const response = await axios.get(`/rooms/${room.id}/messages`)
         if (response.data.messages) {
-            chat.messages = response.data.messages
+            selectedRoom.messages = response.data.messages
         }
     } catch (e) {
         if (e.response && e.response.data && e.response.data.errors) {
             // Handle error
         }
     } finally {
-        chat.isProcessing = false
+        selectedRoom.isChangingRoom = false
+        scrollToBottomOfChat()
     }
+}
+
+const scrollToBottomOfChat = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0.3))
+    var objDiv = document.getElementById("main");
+    objDiv.scrollTop = objDiv.scrollHeight;
 }
 
 const resetRoom = () => {
@@ -92,19 +101,74 @@ const resetRoom = () => {
 }
 
 const selectRoom = (room) => {
+    if (selectedRoom.id) {
+        Echo.leave(`room.message.${selectedRoom.id}`)
+    }
+
+    selectedRoom.id = room.id
     selectedRoom.profile_picture = room.profile_picture
     selectedRoom.name = room.name
-    selectedRoom.id = room.id
+
+    Echo.private(`room.message.${selectedRoom.id}`)
+        .subscribed(() => {
+            console.log('private subs')
+        })
+        .listen('.send-message', (event) => {
+            console.log('private:', event)
+            selectedRoom.messages.push(event.message)
+        })
 }
 
-const sendMessage = (event) => {
+const sendMessage = async (e) => {
+    if (e.keyCode == 13 && e.shiftKey) {
+        return
+    }
+    const message = selectedRoom.form.message
+    const messageWithoutNewLine = message ? message.replace(/\n/g, "") : null;
+    if (messageWithoutNewLine == null || messageWithoutNewLine == '') {
+        e.preventDefault();
+        return
+    }
+
+    const id = Math.floor(Math.random() * 100000)
+    selectedRoom.form.isProcessing = true
+    selectedRoom.form.message = null
+    const newMessage = {
+        id: id,
+        created_at: "mengirim...",
+        message: message,
+        user_id: Inertia.page.props.user.id,
+        user_name: Inertia.page.props.user.name,
+    }
+    selectedRoom.messages.push(newMessage)
+    scrollToBottomOfChat()
+    try {
+        const response = await axios.post(`/rooms/${selectedRoom.id}/messages`, {
+            'message': message
+        })
+        if (response) {
+            const index = selectedRoom.messages.findIndex(message => message.id === id)
+            selectedRoom.messages[index] = response.data.data.message
+        }
+    } catch (e) {
+        const index = selectedRoom.messages.findIndex(message => message.id === id)
+        selectedRoom.messages[index] = {
+            id: id,
+            created_at: "Gagal",
+            message: message,
+            user_id: Inertia.page.props.user.id,
+            user_name: Inertia.page.props.user.name,
+        }
+        errorHandler(e)
+    } finally {
+        selectedRoom.form.isProcessing = false
+
+    }
 }
 
 const logout = () => {
     Inertia.post(route('logout'));
 };
-
-
 
 const newChat = reactive({
     showModal: false,
@@ -165,25 +229,25 @@ const getUserRooms = async () => {
     }
 }
 
-onMounted(() => {
-    Echo.private(`private-channel`)
-        // .subscribe(() => {
-        //     console.log('subscribed')
-        // })
-        .subscribed(() => {
-            console.log('private subs')
-        })
-        .listen('.private-channel', (event) => {
-            console.log('private:', event)
-        })
-    Echo.channel('public-channel')
-        .subscribed(() => {
-            console.log('public subs')
-        })
-        .listen('.public-channel', (event) => {
-            console.log('public: ', event)
-        })
-})
+// onMounted(() => {
+//     Echo.private(`private-channel`)
+//         // .subscribe(() => {
+//         //     console.log('subscribed')
+//         // })
+//         .subscribed(() => {
+//             console.log('private subs')
+//         })
+//         .listen('.private-channel', (event) => {
+//             console.log('private:', event)
+//         })
+//     Echo.channel('public-channel')
+//         .subscribed(() => {
+//             console.log('public subs')
+//         })
+//         .listen('.public-channel', (event) => {
+//             console.log('public: ', event)
+//         })
+// })
 </script>
 
 <template>
@@ -226,8 +290,10 @@ onMounted(() => {
 
                                     <div class="mt-4">
                                         <JetInput ref="emailInput" v-model="newChat.email" type="email"
-                                            class="mt-1 block w-3/4" placeholder="Find by email"
-                                            @keyup.enter="findUsersByEmail" :disabled="newChat.isProcessing" />
+                                            class="mt-1 block w-3/4 transition-all ease-in-out duration-200"
+                                            placeholder="Find by email" :class="{
+                                                'bg-gray-200': newChat.isProcessing
+                                            }" @keyup.enter="findUsersByEmail" :disabled="newChat.isProcessing" />
                                     </div>
                                 </template>
 
@@ -342,17 +408,17 @@ onMounted(() => {
             </div>
         </template>
         <template #chat>
-            <div class="w-full h-full grid content-center" v-if="chat.isProcessing">
+            <div class="w-full h-full grid content-center" v-if="selectedRoom.isChangingRoom">
                 <div class="flex justify-center">
                     <!-- <div class="bg-white rounded shadow-xl p-2"> -->
                     <LoaderDot class=" w-24 h-2w-24" />
                     <!-- </div> -->
                 </div>
             </div>
-            <div class="w-full" v-else>
-                <div class="grid w-full max-h-full pb-2 gap-4" v-if="chat.messages.length > 0">
+            <div ref="chatbody" class="w-full chat-body" v-else>
+                <div class="grid w-full max-h-full pb-4 pt-12 gap-4" v-if="selectedRoom.messages.length > 0">
                     <!-- Other People -->
-                    <div class="" v-for="message in chat.messages" :key="message.id">
+                    <div class="" v-for="message in selectedRoom.messages" :key="message.id">
                         <div class="flex justify-start" v-if="$page.props.user.id != message.user_id">
                             <div class="bg-white rounded-xl rounded-tl-none p-3 pr-16 relative shadow max-w-sm ">
                                 <div class="absolute top-0 -left-2 text-white">
@@ -404,12 +470,18 @@ onMounted(() => {
                 </div>
                 <!-- End Icon -->
                 <div class="flex items-center w-full">
-                    <textarea @keydown.enter="sendMessage($event)" type="text"
+                    <input v-model="selectedRoom.form.message" @keydown.enter="sendMessage($event)" type="text"
                         class="w-full border-gray-100 rounded-lg bg-white focus:outline-none focus:ring-0 focus:border-transparent text-2xl p-4 resize-none transition-all ease-in-out duration-300"
                         :class="{
-                            'bg-gray-200': selectedRoom.id == null || chat.isProcessing
+                            'bg-gray-200': selectedRoom.id == null || selectedRoom.isChangingRoom
                         }" placeholder="Ketik pesan" rows="1"
-                        :disabled="selectedRoom.id == null || chat.isProcessing"></textarea>
+                        :disabled="selectedRoom.id == null || selectedRoom.isChangingRoom" />
+                    <!-- <textarea v-model="selectedRoom.form.message" @keydown.enter="sendMessage($event)" type="text"
+                        class="w-full border-gray-100 rounded-lg bg-white focus:outline-none focus:ring-0 focus:border-transparent text-2xl p-4 resize-none transition-all ease-in-out duration-300"
+                        :class="{
+                            'bg-gray-200': selectedRoom.id == null || selectedRoom.isChangingRoom
+                        }" placeholder="Ketik pesan" rows="1"
+                        :disabled="selectedRoom.id == null || selectedRoom.isChangingRoom"></textarea> -->
                 </div>
             </div>
             <!-- Voice Note -->

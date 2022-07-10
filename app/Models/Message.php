@@ -17,6 +17,7 @@ class Message extends Model
      * @var string[]
      */
     protected $fillable = [
+        'sender_id',
         'room_id',
         'message',
     ];

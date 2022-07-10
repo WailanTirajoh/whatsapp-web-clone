@@ -20,3 +20,7 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 Broadcast::channel('private-channel', function ($user) {
     return true;
 });
+
+Broadcast::channel('room.message.{room_id}', function ($user, $room_id) {
+    return in_array($room_id, $user->rooms->pluck('id')->toArray());
+});
