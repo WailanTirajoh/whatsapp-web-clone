@@ -14,6 +14,33 @@ import Toast from '@/Jetstream/Components/System/Toast.vue';
 
 import { Inertia } from '@inertiajs/inertia';
 
+let sections = {};
+onMounted(() => {
+    var i = 0;
+    const mainView = document.querySelector("#main")
+    let theText = ''
+    mainView.onscroll = function () {
+        var scrollPosition = mainView.scrollTop;
+        let newArr = []
+        for (i in sections) {
+            if (sections[i] + 30 <= scrollPosition) {
+                newArr.push(i)
+            }
+        }
+        if (newArr.length > 0) {
+            let viewedDiv = newArr[newArr.length - 1]
+            if (document.querySelector(`#${viewedDiv} .text`)) {
+                if (theText != document.querySelector(`#${viewedDiv} .text`).textContent) {
+                    theText = document.querySelector(`#${viewedDiv} .text`).textContent
+                    if (document.getElementById('curdate')) {
+                        document.getElementById('curdate').innerHTML = theText
+                    }
+                }
+            }
+        }
+    };
+})
+
 
 const app = reactive({
     title: 'Dashboard'
@@ -86,6 +113,13 @@ const changeRoom = async (room) => {
     } finally {
         selectedRoom.isChangingRoom = false
         scrollToBottomOfChat()
+        await new Promise((resolve) => setTimeout(resolve, 1))
+
+        const section = document.querySelectorAll("main .dates");
+        const m = document.querySelector("main")
+        Array.prototype.forEach.call(section, function (e) {
+            sections[e.id] = e.offsetTop - m.offsetTop;
+        });
     }
 }
 
@@ -117,6 +151,7 @@ const selectRoom = (room) => {
         .listen('.send-message', (event) => {
             console.log('private:', event)
             selectedRoom.messages.push(event.message)
+            scrollToBottomOfChat()
         })
 }
 
@@ -427,13 +462,17 @@ const checkIndex = (index) => {
                     <!-- </div> -->
                 </div>
             </div>
-            <div ref="chatbody" class="w-full chat-body" v-else>
+            <div ref="chatbody" class="w-full chat-body relative" v-else>
                 <div class="grid w-full max-h-full pb-4 pt-12 gap-x-4 gap-y-1" v-if="selectedRoom.messages.length > 0">
+                    <div class="sticky top-0 flex justify-center z-10">
+                        <div id="curdate" class="p-2 bg-gray-50 shadow-sm rounded-lg">
+                        </div>
+                    </div>
                     <!-- Other People -->
                     <div class="" v-for="message, index in selectedRoom.messages" :key="message.id">
-                        <div class="flex justify-center"
+                        <div :id="`dates_${index}`" class="flex justify-center dates"
                             v-if="(index == 0 || moment(selectedRoom.messages[index - 1].created_at).format('DD') != moment(message.created_at).format('DD') && moment(message.created_at).isValid())">
-                            <div class="p-2 bg-gray-50 shadow-sm rounded-lg">
+                            <div class="p-2 bg-gray-50 shadow-sm rounded-lg text">
                                 {{ moment(message.created_at).calendar({
                                         sameDay: '[Today]',
                                         nextDay: '[Tomorrow]',

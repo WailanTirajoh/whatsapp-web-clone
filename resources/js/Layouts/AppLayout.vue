@@ -22,7 +22,7 @@ defineProps({
                     <slot name="chatHeader" />
                 </header>
                 <!-- Page Content -->
-                <main id="main" class="py-4 overflow-y-auto overflow-x-hidden px-32 flex items-end pb-8 scroll-smooth">
+                <main id="main" class="py-4 overflow-y-auto overflow-x-hidden px-32 flex items-end pb-8 scroll-smooth relative">
                     <slot name="chat" />
                 </main>
                 <div class="chat bg-gray-100 flex">
