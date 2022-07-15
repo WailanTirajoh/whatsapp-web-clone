@@ -47,23 +47,7 @@ return [
         //     ],
         // ],
 
-        // Non SSL
-        'pusher' => [
-            'driver' => 'pusher',
-            'key' => env('PUSHER_APP_KEY'),
-            'secret' => env('PUSHER_APP_SECRET'),
-            'app_id' => env('PUSHER_APP_ID'),
-            'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'useTLS' => false,
-                'encrypted' => false,
-                'host' => env('PUSHER_HOST'),
-                'port' => env('PUSHER_PORT'),
-                'scheme' => env('PUSHER_SCHEME'),
-            ],
-        ],
-
-        // // SSL
+        // // Non SSL
         // 'pusher' => [
         //     'driver' => 'pusher',
         //     'key' => env('PUSHER_APP_KEY'),
@@ -71,21 +55,37 @@ return [
         //     'app_id' => env('PUSHER_APP_ID'),
         //     'options' => [
         //         'cluster' => env('PUSHER_APP_CLUSTER'),
-        //         'useTLS' => env('PUSHER_FORCE_TLS'),
-        //         'encrypted' => env('PUSHER_FORCE_TLS'),
+        //         'useTLS' => false,
+        //         'encrypted' => false,
         //         'host' => env('PUSHER_HOST'),
         //         'port' => env('PUSHER_PORT'),
         //         'scheme' => env('PUSHER_SCHEME'),
-        //         'curl_options' => [
-        //             CURLOPT_SSL_VERIFYHOST => 0,
-        //             CURLOPT_SSL_VERIFYPEER => 0,
-        //         ],
-        //     ],
-        //     'client_options' => [
-        //         'verify' => false
-        //         // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
         //     ],
         // ],
+
+        // SSL
+        'pusher' => [
+            'driver' => 'pusher',
+            'key' => env('PUSHER_APP_KEY'),
+            'secret' => env('PUSHER_APP_SECRET'),
+            'app_id' => env('PUSHER_APP_ID'),
+            'options' => [
+                'cluster' => env('PUSHER_APP_CLUSTER'),
+                'useTLS' => env('PUSHER_FORCE_TLS'),
+                'encrypted' => env('PUSHER_FORCE_TLS'),
+                'host' => env('PUSHER_HOST'),
+                'port' => env('PUSHER_PORT'),
+                'scheme' => env('PUSHER_SCHEME'),
+                'curl_options' => [
+                    CURLOPT_SSL_VERIFYHOST => 0,
+                    CURLOPT_SSL_VERIFYPEER => 0,
+                ],
+            ],
+            'client_options' => [
+                'verify' => false
+                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+            ],
+        ],
 
         'ably' => [
             'driver' => 'ably',
