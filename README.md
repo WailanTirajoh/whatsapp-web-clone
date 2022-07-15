@@ -1,34 +1,37 @@
 # Laravel Whatsapp Clone
 
-## Example
+### Example
 
 ![alt text](https://github.com/WailanTirajoh/laravel-whatsapp-web-clone/blob/main/ex.jpg?raw=true)
 
-## Installation
+### Installation
 
-clone or fork this project
+- clone or fork this project
 ```
 git clone https://github.com/WailanTirajoh/laravel-whatsapp-web-clone.git
 ```
-then copy .env from .env.example and configure it
+
+- then copy .env from .env.example and configure it
 ```
 cp .env.example .env
 nano .env
 ```
-at this step you need to configure your database name, and pusher creds, but i already fill it with dummy test.
+
+- at this step you need to configure your database name, and pusher creds, but i already fill it with dummy test.
 ```
 #install dependency
 composer install
 #install assets
 npm install
 ```
-generate key and then run migration & seeder
+
+- generate key and then run migration & seeder
 ```
 php artisan key:generate
 php artisan migrate:fresh --seed
 ```
 
-asset build
+- asset build
 ```
 #for development
 npm run dev
@@ -36,7 +39,7 @@ npm run dev
 npm run build
 ```
 
-and then serve the apps
+- and then serve the apps
 ```
 #to run websocket (terminal 1)
 php artisan websockets:serve
@@ -45,8 +48,8 @@ php artisan websockets:serve
 php artisan serve
 ```
 
-You can login with
-
+- You can login with
+```
 user 1
 email: wailantirajoh@gmail.com
 pass: wailan
@@ -54,6 +57,7 @@ pass: wailan
 user 2
 email: putririnding21@gmail.com
 pass: putri
+```
 
 or you can create your own account.
 
