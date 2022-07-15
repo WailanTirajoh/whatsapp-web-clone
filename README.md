@@ -6,28 +6,38 @@
 
 ## Installation
 
+clone or fork this project
 ```
-#clone or fork this project
 git clone https://github.com/WailanTirajoh/laravel-whatsapp-web-clone.git
-#copy .env
+```
+then copy .env from .env.example and configure it
+```
 cp .env.example .env
-#edit .env
 nano .env
-## at this step you need to configure your database name, and pusher creds, but i already fill it with dummy test.
+```
+at this step you need to configure your database name, and pusher creds, but i already fill it with dummy test.
+```
 #install dependency
 composer install
 #install assets
 npm install
+```
+generate key and then run migration & seeder
+```
+php artisan key:generate
+php artisan migrate:fresh --seed
+```
 
+asset build
+```
 #for development
 npm run dev
-
 #for deployment
 npm run build
+```
 
-#run migration & seeder
-php artisan migrate:fresh --seed
-
+and then serve the apps
+```
 #to run websocket (terminal 1)
 php artisan websockets:serve
 
