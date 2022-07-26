@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ReceiveMessageEvent;
 use App\Events\StoreRoomMessageEvent;
 use App\Http\Requests\StoreRoomMessageRequest;
 use App\Http\Resources\RoomMessageResource;
@@ -48,6 +49,10 @@ class RoomMessageController extends Controller
                 'message' => $request->message,
             ]);
             broadcast(new StoreRoomMessageEvent($message))->toOthers();
+
+            foreach ($room->users as $user) {
+                broadcast(new ReceiveMessageEvent($room, $user));
+            }
 
             DB::commit();
 

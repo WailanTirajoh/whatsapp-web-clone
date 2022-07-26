@@ -24,3 +24,7 @@ Broadcast::channel('private-channel', function ($user) {
 Broadcast::channel('room.message.{room_id}', function ($user, $room_id) {
     return in_array($room_id, $user->rooms->pluck('id')->toArray());
 });
+
+Broadcast::channel('user.{user_id}', function ($user, $user_id) {
+    return (int) $user->id === (int) $user_id;
+});

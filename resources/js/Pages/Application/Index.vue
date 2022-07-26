@@ -13,9 +13,19 @@ import JetInput from '@/Jetstream/Input.vue';
 import Toast from '@/Jetstream/Components/System/Toast.vue';
 
 import { Inertia } from '@inertiajs/inertia';
+import { usePage } from '@inertiajs/inertia-vue3';
+
+const user = usePage().props.value.user
 
 let sections = {};
 onMounted(() => {
+    Echo.private(`user.${user.id}`)
+        .subscribed(() => {
+        })
+        .listen('.receive-message', (event) => {
+            let roomIndex = rooms.data.findIndex((room => room.id == event.room.id));
+            rooms.data[roomIndex] = event.room
+        })
     var i = 0;
     const mainView = document.querySelector("#main")
     let theText = ''
@@ -146,10 +156,8 @@ const selectRoom = (room) => {
 
     Echo.private(`room.message.${selectedRoom.id}`)
         .subscribed(() => {
-            console.log('private subs')
         })
         .listen('.send-message', (event) => {
-            console.log('private:', event)
             selectedRoom.messages.push(event.message)
             scrollToBottomOfChat()
         })
@@ -275,26 +283,6 @@ const checkMessageRead = (messageReads) => {
 const checkIndex = (index) => {
     if (index === selectedRoom.messages.length - 1) scrollToBottomOfChat()
 }
-
-// onMounted(() => {
-//     Echo.private(`private-channel`)
-//         // .subscribe(() => {
-//         //     console.log('subscribed')
-//         // })
-//         .subscribed(() => {
-//             console.log('private subs')
-//         })
-//         .listen('.private-channel', (event) => {
-//             console.log('private:', event)
-//         })
-//     Echo.channel('public-channel')
-//         .subscribed(() => {
-//             console.log('public subs')
-//         })
-//         .listen('.public-channel', (event) => {
-//             console.log('public: ', event)
-//         })
-// })
 </script>
 
 <template>
